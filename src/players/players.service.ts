@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { CreateDeck } from './create_deck.dto';
+import { ChangeDeck, CreateDeck } from './create_deck.dto';
 import { Action, Deck, User, users } from 'src/user';
 
 @Injectable()
@@ -7,7 +7,7 @@ export class PlayersService {
     async createDeck(create_deck: CreateDeck, player_id: string) {
         const deck = new Deck(create_deck, parseInt(player_id));
         const user: User = JSON.parse(await users.get(player_id));
-        user.decks[deck.id]= deck;
+        user.decks[deck.id] = deck;
         User.prototype.store.call(user);
         return deck;
     }
@@ -20,6 +20,19 @@ export class PlayersService {
                 if (deck) {
                     deck.deck_code = deck_action.deck_code;
                 }
+                break;
+        }
+        User.prototype.store.call(user);
+    }
+
+    async changeDeck(action: ChangeDeck, player_id: string) {
+        const user: User = JSON.parse(await users.get(player_id));
+        switch (action.action) {
+            case "rename":
+                user.decks[action.id].name = action.name;
+                break;
+            case "change_card_back":
+                user.decks[action.id].card_back = action.name;
                 break;
         }
         User.prototype.store.call(user);

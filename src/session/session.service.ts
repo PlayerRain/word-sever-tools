@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Session } from "./session.dto";
 import { User, users } from "../user";
-import { server_address } from 'src/config';
+import { ip, server_address, ws_port } from 'src/config';
 
 @Injectable()
 export class SessionService {
@@ -14,6 +14,8 @@ export class SessionService {
       user = new User(session.username);
       user.store();
     }
+    if (user.banned) return "banned"
+    //else if (session.version != "wards 1.0.0") return "update";
     //console.log(user);
     return {
       "achievements_url": server_address + "/players/" + user.id + "/achievements",
@@ -34,7 +36,7 @@ export class SessionService {
       "diamonds": 99999,
       "double_xp_end_date": "2025-07-03T12:13:36.889692Z",
       "draft_admissions": 1,
-      "dust": 789,
+      "dust": 1000,
       "email": null,
       "email_reward_received": false,
       "email_verified": false,
@@ -79,7 +81,7 @@ export class SessionService {
       "rewards": [],
       "season_end": "2025-08-01T00:00:00Z",
       "season_wins": 9999,
-      "server_options": "{\"nui_mobile\": 1, \"scalability_override\": {\"Android_Low\": {\"console_commands\": [\"r.Screenpercentage 100\"]}, \"Android_Mid\": {\"console_commands\": [\"r.Screenpercentage 100\"]}, \"Android_High\": {\"console_commands\": [\"r.Screenpercentage 100\"]}}, \"appscale_desktop_default\": 1.0, \"appscale_desktop_max\": 1.4, \"appscale_mobile_default\": 1.4, \"appscale_mobile_max\": 1.4, \"appscale_mobile_min\": 1.0, \"appscale_tablet_min\": 1.0, \"battle_wait_time\": 60, \"nui_mobile\": 1, \"scalability_override\": {\"Android_Low\": {\"console_commands\": [\"r.Screenpercentage 100\"]}, \"Android_Mid\": {\"console_commands\": [\"r.Screenpercentage 100\"]}, \"Android_High\": {\"console_commands\": [\"r.Screenpercentage 100\"]}}, \"websocketurl\": \"ws://103.91.208.25:5232\"}",
+      "server_options": `{"nui_mobile": 1, "scalability_override": {"Android_Low": {"console_commands": ["r.Screenpercentage 100"]}, "Android_Mid": {"console_commands": ["r.Screenpercentage 100"]}, "Android_High": {"console_commands": ["r.Screenpercentage 100"]}}, "appscale_desktop_default": 1.0, "appscale_desktop_max": 1.4, "appscale_mobile_default": 1.4, "appscale_mobile_max": 1.4, "appscale_mobile_min": 1.0, "appscale_tablet_min": 1.0, "battle_wait_time": 60, "nui_mobile": 1, "scalability_override": {"Android_Low": {"console_commands": ["r.Screenpercentage 100"]}, "Android_Mid": {"console_commands": ["r.Screenpercentage 100"]}, "Android_High": {"console_commands": ["r.Screenpercentage 100"]}}, "websocketurl": "ws://${ip}:${ws_port}"}`,
       "server_time": "2025.07.06-04.06.03",
       "soviet_level": 500,
       "soviet_level_claimed": 500,

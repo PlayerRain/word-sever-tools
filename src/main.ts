@@ -4,6 +4,7 @@ import { ExpressAdapter } from '@nestjs/platform-express';
 import * as express from 'express';
 import { WebSocket } from 'ws';
 import { User, users } from './user';
+import { port, ws_port } from './config';
 
 async function bootstrap() {
   const server = express();
@@ -14,13 +15,12 @@ async function bootstrap() {
     AppModule,
     new ExpressAdapter(server)
   );
-  await app.listen(5231);//你要是不会就不要改这玩意
+  await app.listen(port);
 }
 bootstrap();
 
-const wss = new WebSocket.Server({ port:5232});//你要是不会就不要改这玩意
+const wss = new WebSocket.Server({ port: ws_port });
 export const clients: { [key: string]: { user: User, client } } = {};
-
 wss.on("connection", async (ws, req) => {
   const user: User = JSON.parse(await users.get(req.headers["authorization"].slice(4)));
   clients[user.id] = { user, client: ws };
@@ -46,18 +46,28 @@ wss.on("connection", async (ws, req) => {
         }));
         break;
       case "touchcard":
-        clients[msg.receiver].client.send(JSON.stringify({
-            message: msg.message,
-            channel: "touchcard",
-            context: msg.context,
-            timestamp: new Date(),
-            sender: user.id,
-            receiver: msg.receiver
-          }));
+        clients[msg.receiver]?.client.send(JSON.stringify({
+          message: msg.message,
+          channel: "touchcard",
+          context: msg.context,
+          timestamp: new Date(),
+          sender: user.id,
+          receiver: msg.receiver
+        }));
+        break;
+      case "emoji":
+        clients[msg.receiver]?.client.send(JSON.stringify({
+          message: msg.message,
+          channel: "emoji",
+          context: msg.context,
+          timestamp: new Date(),
+          sender: user.id,
+          receiver: msg.receiver
+        }));
         break;
       case "notification":
         if (msg.message == "websocketcheck") {
-          clients[msg.receiver].client.send(JSON.stringify({
+          clients[msg.receiver]?.client.send(JSON.stringify({
             message: "websocketcheck",
             channel: "notification",
             context: msg.context,
@@ -66,7 +76,7 @@ wss.on("connection", async (ws, req) => {
             receiver: msg.receiver
           }));
         } else if (msg.message == "matchaction") {
-          clients[msg.receiver].client.send(JSON.stringify({
+          clients[msg.receiver]?.client.send(JSON.stringify({
             message: "matchaction",
             channel: "notification",
             context: msg.context,
@@ -75,7 +85,7 @@ wss.on("connection", async (ws, req) => {
             receiver: msg.receiver
           }));
         } else if (msg.message == "im_here") {
-          clients[msg.receiver].client.send(JSON.stringify({
+          clients[msg.receiver]?.client.send(JSON.stringify({
             message: "im_here",
             channel: "notification",
             context: "",
@@ -88,5 +98,6 @@ wss.on("connection", async (ws, req) => {
     }
   })
   ws.on("close", () => {
+    delete clients[user.id];
   })
 });

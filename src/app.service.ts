@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { items, server_address } from "./config";
+import { server_address } from "./config";
 import { Item, User, users } from './user';
+import { items } from './library';
 
 @Injectable()
 export class AppService {
@@ -53,12 +54,18 @@ export class AppService {
   }
 
   getItems(player: User) {
-    return { equipped_items: player.equipped_item, items }
+    if (!player.items) player.items = [];
+    User.prototype.store.call(player);
+    return { equipped_items: player.equipped_item, items: items.concat(player.items) };
   }
 
   equipItem(player: User, item: Item) {
-    if(item.slot != "avatar") return;
-    player.equipped_item = [item];
+    if (!player.equipped_item) player.equipped_item = [];
+    let i = -1;
+    while ((i = player.equipped_item.findIndex((i) => i.slot == item.slot)) != -1) {
+      player.equipped_item.splice(i, 1);
+    };
+    player.equipped_item.push(item);
     User.prototype.store.call(player);
   }
 }

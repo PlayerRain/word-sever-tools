@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Headers, Delete, Param, Put } from '@nestjs/common';
+import { Body, Controller, Get, Post, Headers, Delete, Param, Put, Req, Res } from '@nestjs/common';
 import { MatchService } from './match.service';
 import { LobbyPlayer, MatchAction, MulliganCards } from './match.dto';
 import { User, users } from 'src/user';
@@ -9,8 +9,8 @@ export class MatchController {
     constructor(private readonly matchService: MatchService) { }
 
     @Post("lobbyplayers")
-    joinMatch(@Body() lobbyPlayer: LobbyPlayer) {
-        this.matchService.joinMatch(lobbyPlayer);
+    async joinMatch(@Body() lobbyPlayer: LobbyPlayer, @Req() req) {
+        if (!await this.matchService.joinMatch(lobbyPlayer)) req.socket.destroy();
         return "OK";
     }
 
@@ -37,8 +37,8 @@ export class MatchController {
     }
 
     @Put("matches/v2/:id/actions")
-    async actions(@Headers("Authorization") auth: string, @Param("id") id: number) {
-        return this.matchService.actions(id, JSON.parse(await users.get(auth.slice(8))));
+    async actions(@Headers("Authorization") auth: string, @Param("id") id: number, @Body() body) {
+        return this.matchService.actions(id, JSON.parse(await users.get(auth.slice(8))), body);
     }
 
     @Post("matches/v2/:id/actions")
@@ -59,17 +59,5 @@ export class MatchController {
     @Get("matches/v2/:id/post")
     async post(@Headers("Authorization") auth: string, @Param("id") id: number) {
         return this.matchService.post(id, JSON.parse(await users.get(auth.slice(8))));
-    }
-
-    @Get("kickall")
-    kickall() {
-        Object.values(clients).forEach((c) => c.client.send(JSON.stringify({
-            message: "谁让你玩了?",
-            channel: "disconnect",
-            context: null,
-            timestamp: "",
-            sender: "Server",
-            receiver: null
-        })));
     }
 }

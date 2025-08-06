@@ -13,7 +13,7 @@ export class Deck {
         this.name = deck_action.name;
         this.main_faction = deck_action.main_faction;
         this.ally_faction = deck_action.ally_faction;
-        this.card_back = "cardback_starter_usa";
+        this.card_back = "cardback_starter_" + deck_action.main_faction.toLowerCase();
         this.deck_code = deck_action.deck_code;
         this.favorite = false;
         this.id = Math.floor(Math.random() * 900000) + 100000;
@@ -56,6 +56,19 @@ export class Deck {
             location
         }
     }
+    isVaild() {
+        const cards_code = this.deck_code.replace(/~[^|]*/g, "").split("|")[1].split(";");
+        const cards = {};
+        let result = true;
+        for (const i of [0, 1, 2, 3]) {
+            cards_code[i].match(/.{1,2}/g)?.forEach((code) => {
+                if (!cards[code]) cards[code] = i+1;
+                else cards[code] += i+1;
+                if (cards[code] > 4) result = false;
+            });
+        }
+        return result;
+    }
     name: string;
     main_faction: main_faction;
     ally_faction: ally_faction;
@@ -86,6 +99,8 @@ export class User {
         this.locale = "zh-Hans";
         this.decks = {};
         this.equipped_item = [];
+        this.items = [];
+        this.banned = false;
     }
     async store() {
         await users.put(this.user_name, JSON.stringify(this));
@@ -98,6 +113,8 @@ export class User {
     tag: number;
     decks: { [key: number]: Deck };
     equipped_item: Item[];
+    items;
+    banned: boolean;
 }
 
 export class Action {

@@ -1,7 +1,7 @@
-import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Headers } from '@nestjs/common';
 import { PlayersService } from './players.service';
 import { library } from 'src/library';
-import { CreateDeck } from './create_deck.dto';
+import { ChangeDeck, CreateDeck } from './create_deck.dto';
 import { Action, User, users } from 'src/user';
 
 @Controller('players')
@@ -23,9 +23,14 @@ export class PlayersController {
         return this.playersService.decksAction(deck_action, player_id, deck_id);
     }
 
+    @Put(":player_id/decks/")
+    changeDeck(@Body() deck_action: ChangeDeck, @Param("player_id") player_id: string) {
+        return this.playersService.changeDeck(deck_action, player_id);
+    }
+
     @Delete(":player_id/decks/:deck_id")
     async deleteDeck(@Param("player_id") player_id: string, @Param("deck_id") deck_id: number) {
-        const user:User = JSON.parse(await users.get(player_id+""));
+        const user: User = JSON.parse(await users.get(player_id + ""));
         delete user.decks[deck_id];
         User.prototype.store.call(user);
     }
