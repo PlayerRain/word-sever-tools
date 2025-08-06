@@ -1,3 +1,9 @@
+# 学习指南
+
+- 安装NODE.JS后启动bat即可
+- 你需要更改的ts文件有 
+- src/config.ts
+- https://discord.gg/p2RjNjuV 
 # 免责声明 / Disclaimer
 
 ## 中文版
@@ -74,8 +80,7 @@ Valid notices will be handled per GPL-3.0 requirements.
 
 - 安装NODE.JS后启动bat即可
 - 你需要更改的ts文件有 
-- src/config.ts
-- src/main.ts
+- src/config.ts=
 - 改成你的本地局域网ip即可
 - 剩下的就靠你自己探索啦 不会就去学啦！
 - https://discord.gg/p2RjNjuV
